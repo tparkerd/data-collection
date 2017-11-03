@@ -1,0 +1,7 @@
+*.ini
+*.log
+*.bin
+*.exe
+*.out
+/output
+/manual
