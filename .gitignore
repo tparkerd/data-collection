@@ -3,5 +3,6 @@
 *.bin
 *.exe
 *.out
+*.json
 /output
 /manual
