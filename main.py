@@ -41,6 +41,10 @@ for submission in posts:
         tmp['title'] = submission.title
         tmp['ups'] = submission.ups
         tmp['downs'] = submission.downs
+        tmp['comments'] = []
+        for comment in submission.comments:
+            tmp['comments'].append(comment.body)
+
         output['data'].append((tmp))
 
 f.write(json.dumps(output, sort_keys = True, indent = 2))
