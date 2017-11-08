@@ -41,9 +41,11 @@ for submission in posts:
         tmp['title'] = submission.title
         tmp['ups'] = submission.ups
         tmp['downs'] = submission.downs
+        tmp['content'] = submission.selftext
         tmp['comments'] = []
         for comment in submission.comments:
-            tmp['comments'].append(comment.body)
+            if comment.ups > 0:
+                tmp['comments'].append(comment.body)
 
         output['data'].append((tmp))
 
