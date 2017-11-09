@@ -256,6 +256,18 @@ def parseSubreddit(str, reddit):
     #     f.write(json.dumps(output, sort_keys = True, indent = 2))
     # print(fileLocation + ' was created.')
 
+# Now: 1510251409
+def foo(str, r):
+    # print(dir(r))
+    # print(dir(r.post))
+    # print(dir(r.subreddit(str).search))
+    # begin = 1483228800; ## Jan 1, 2017 @ 00:00:00 UTC
+    # end = begin + 1800 ## increment by 30 mins
+    search_results = r.subreddit(str).search('timestamp:1509508800..1510290000', syntax='cloudsearch')
+    for post in search_results:
+        # print(dir(post))
+        print(post.title)
+
 def main():
     # Open up the config file and read it's contents
     config = configparser.ConfigParser()
@@ -269,8 +281,10 @@ def main():
     subreddits = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 
     # createTable()
-    for r in subreddits:
-        parseSubreddit(r, red)
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M - Added 100 ' + r + '.'))
+    # for r in subreddits:
+    #     parseSubreddit(r, red)
+    #     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M - Added 100 ' + r + '.'))
+    foo('chinaart', red)
 
-main()
+# main()
+createTable()

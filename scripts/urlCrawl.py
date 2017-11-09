@@ -23,7 +23,7 @@ j = json.loads(r.content)
 
 predictFile = open('suicidewatch.out', 'w+')
 begin = 1483228800; ## Jan 1, 2017 @ 00:00:00 UTC
-end = begin + 1800
+end = begin + 1800 ## increment by 30 mins
 while True:
 	exept_b = False
 	if begin > 1514764799: # Dec 31, 2017 @ 23:59:59 UTC = 1514764799
