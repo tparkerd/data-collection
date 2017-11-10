@@ -18,8 +18,10 @@ import time
 
 # Start and end times for the set of queries you want to search
 # Time converter: https://www.epochconverter.com/
-START = 1509854400 # 5 Nov 2017 @ 00:00:00 EST
-END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
+# START = 1509854400 # 5 Nov 2017 @ 00:00:00 EST
+# END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
+START = 1483228800 # 5 Nov 2017 @ 00:00:00 GMT
+END = 1514764799 # 11 Nov 2017 @ 23:59:59 GMT
 
 # Subreddits to pull data from
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
@@ -37,7 +39,7 @@ def createTables():
                 created VARCHAR(32),
                 created_utc VARCHAR(32),
                 domain VARCHAR(64),
-                downs VARCHAR(11),
+                downs INTEGER(11),
                 edited VARCHAR(12),
                 fullname VARCHAR(128),
                 gilded VARCHAR(12),
@@ -47,37 +49,36 @@ def createTables():
                 is_reddit_media_domain VARCHAR(12),
                 is_self VARCHAR(12),
                 is_video VARCHAR(12),
-                likes VARCHAR(11),
+                likes INTEGER(11),
                 locked VARCHAR(12),
                 media VARCHAR(64),
                 media_embed VARCHAR(64),
                 mod_reports VARCHAR(64),
                 name VARCHAR(32),
-                num_comments VARCHAR(11),
-                num_crossposts VARCHAR(11),
-                num_reports VARCHAR(11),
+                num_comments INTEGER(11),
+                num_crossposts INTEGER(11),
+                num_reports INTEGER(11),
                 over_18 VARCHAR(12),
-                permalink VARCHAR(64),
+                permalink VARCHAR(128),
                 pinned VARCHAR(12),
                 quarantine VARCHAR(12),
                 removal_reason VARCHAR(64),
                 report_reasons VARCHAR(64),
                 saved VARCHAR(12),
-                score VARCHAR(11),
+                score INTEGER(11),
                 secure_media VARCHAR(64),
                 secure_media_embed VARCHAR(64),
                 selftext TEXT(12000),
                 shortlink VARCHAR(64),
-                spoiler VARCHAR(12),
                 subreddit_id VARCHAR(64),
                 subreddit_name_prefixed VARCHAR(64),
                 subreddit_type VARCHAR(64),
                 thumbnail VARCHAR(64),
                 title VARCHAR(512),
-                ups VARCHAR(11),
+                ups INTEGER(11),
                 url VARCHAR(512),
                 user_reports VARCHAR(64),
-                view_count VARCHAR(11),
+                view_count INTEGER(11),
                 visited VARCHAR(12),
                 CONSTRAINT PRIMARY KEY (id));
               """
@@ -100,8 +101,7 @@ def createTables():
 
 def insertSubmission(submission):
     data = submission
-    comments = "TODO"
-    query = ("INSERT INTO posts(title, created_utc, domain, downs, ups, edited, fullname, _id, likes, num_comments, score, selftext, subreddit_id, subreddit_name_prefixed, url, view_count) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (re.escape(data.title), data.created_utc, data.domain, data.downs, data.ups, data.edited, data.fullname, data.id, data.likes, data.num_comments, data.score, re.escape(data.selftext), data.subreddit_id, data.subreddit_name_prefixed, data.url, data.view_count))
+    query = ("INSERT INTO posts(title, created_utc, domain, downs, ups, edited, fullname, _id, num_comments, score, selftext, subreddit_id, subreddit_name_prefixed, url) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (re.escape(data.title), data.created_utc, data.domain, data.downs, data.ups, data.edited, data.fullname, data.id, data.num_comments, data.score, re.escape(data.selftext), data.subreddit_id, data.subreddit_name_prefixed, data.url))
     postId = -1
 
     try:
@@ -147,7 +147,7 @@ def search(sub):
             if not postId == -1:
                 insertComments(post, postId)
         i = i + (18000) # 5 hours
-        time.sleep(4)
+        time.sleep(2)
 
 def init():
     # Open up the config file and read it's contents
