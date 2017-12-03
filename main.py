@@ -28,8 +28,17 @@ END = 1514764799 # 11 Nov 2017 @ 23:59:59 GMT
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 
+# Open up the config file and read it's contents
+config = configparser.ConfigParser()
+config.sections()
+config.read('credentials.ini')
+host = config['db']['host']
+username = config['db']['username']
+password = config['db']['password']
+database = config['db']['database']
+
 def createTables():
-    db = MySQLdb.connect("localhost","root","admin","reddit")
+    db = MySQLdb.connect(host, username, password, database)
     cursor = db.cursor()
 
     cursor.execute("DROP TABLE IF EXISTS comments")
@@ -106,7 +115,7 @@ def insertSubmission(submission):
     postId = -1
 
     try:
-        db = MySQLdb.connect("localhost","root","admin","reddit")
+        db = MySQLdb.connect(host, username, password, database)
         cursor = db.cursor()
         cursor.execute(query)
         postId = db.insert_id()
@@ -120,7 +129,7 @@ def insertSubmission(submission):
 
 def insertComments(submission, postId):
         try:
-            db = MySQLdb.connect("localhost","root","admin","reddit")
+            db = MySQLdb.connect(host, username, password, database)
             cursor = db.cursor()
             # Get the comments for the entire post
             for c in submission.comments:
@@ -151,10 +160,6 @@ def search(sub):
         time.sleep(2)
 
 def init():
-    # Open up the config file and read it's contents
-    config = configparser.ConfigParser()
-    config.sections()
-    config.read('credentials.ini')
     # Create an instance of Reddit with OAuth2
     reddit = praw.Reddit(client_id = config['User']['id'],
                          client_secret = config['User']['secret'],
@@ -164,7 +169,7 @@ def init():
 
 def main():
     reddit = init()
-    # createTable()
+    createTable()
     for sub in SUBREDDITS:
         search(reddit.subreddit(sub))
 
