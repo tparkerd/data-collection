@@ -24,6 +24,7 @@ START = 1483228800 # 5 Nov 2017 @ 00:00:00 GMT
 END = 1514764799 # 11 Nov 2017 @ 23:59:59 GMT
 
 # Subreddits to pull data from
+# https://anvaka.github.io/redsim/
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 
@@ -168,5 +169,5 @@ def main():
         search(reddit.subreddit(sub))
 
 
-createTables()
+# createTables()
 main()
