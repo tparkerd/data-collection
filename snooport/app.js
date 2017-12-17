@@ -1,8 +1,6 @@
 'use strict'
-const snoowrap   = require('snoowrap'),
-      config = require('./config.js')
-
-console.log(config);
+const snoowrap = require('snoowrap'),
+      config   = require('./config.js')
 
 // Create a new snoowrap requester with OAuth credentials.
 // For more information on getting credentials, see here: https://github.com/not-an-aardvark/reddit-oauth-helper
@@ -10,8 +8,18 @@ const r = new snoowrap({
   userAgent: config.user.userAgent,
   clientId: config.user.clientId,
   clientSecret: config.user.clientSecret,
-  refreshToken: config.user.refreshToken
-});
+  refreshToken: config.user.token
+})
+
+// let start = 1483228800,
+//     end   = 1513457110
+// const q = `timestamp:${start}..${end}`
+// r.search({query: q, subreddit: 'depression', syntax: 'cloudsearch'}).then(console.log)
+
+r.config({requestDelay: 1000, warnings: false})
+let user = r.getUser('DaretTheCoconut')
+console.log(user);
+
 //
 // // That's the entire setup process, now you can just make requests.
 //
