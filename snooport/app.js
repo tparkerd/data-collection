@@ -5,53 +5,60 @@ const snoowrap = require('snoowrap'),
       path     = require('path')
 
 
-// curl https://oauth.reddit.com/api/v1/access_token --user-agent "WordChatBox:wordwatch:v1.0.0" --user mHyCH3sNGXTjMg:IFxWKMElgD-wPuBI1BrQSVsNIxo --data 'grant_type=client_credentials'
-
-// Start time: 1451624400 = Friday, January 1, 2016 12:00:00 AM EST
-// End time:   1483246800 = Sunday, January 1, 2017 12:00:00 AM EST
-let start = 1451624400
-let end   = 1483246800
-
-let subreddits = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
-
-subreddits = [ 'depression' ]
-
-
 let createTables = () => {
   // TODO
 }
 
-let search = (start, end, subreddits, conn) => {
-  let query = 'timestamp:' + start + '..' + end
+let search = (conn) => {
+  // curl https://oauth.reddit.com/api/v1/access_token --user-agent "WordChatBox:wordwatch:v1.0.0" --user mHyCH3sNGXTjMg:IFxWKMElgD-wPuBI1BrQSVsNIxo --data 'grant_type=client_credentials'
+
+
+  let subreddits = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
+
+  subreddits = [ 'depression' ]
+
+  let start = 1451624400 // 1451624400 = Friday, January 1, 2016 12:00:00 AM EST
+  let end   = 1483246800 // 1483246800 = Sunday, January 1, 2017 12:00:00 AM EST
+
+  // See how submissions are pulled down and how to traverse each of the comments
+  // As is, it just seems to pull down all the top-level posts but not a single comment. I'm still not sure what fetchAll() does
+
+  let query = 'timestamp:' + 1483246800 + '..' + 1483250400
+  console.log(query)
   conn.search({
     query: query,
     subreddit: 'depression',
     syntax: 'cloudsearch',
     limit: 1
   })
-  // .fetchAll()
-  .then( listing => {
-    console.log(Object.keys(listing[0]));
-    for (let e in Object.keys(listing[0])) {
-      console.log(listing[0][e]);
+  .then( list => {
+    for (let id in list) {
+      if (Number.isInteger(Number.parseInt(id))) {
+        console.log(id)
+        list[id].expandReplies().then( result => {
+          // TODO: insert into database
+
+          fs.writeFileSync('test.out', JSON.stringify(result, null, 2), { flag: 'a' })
+        })
+      }
     }
   })
+
+
+
   }
 
-let init = (config) => {
+let main = () => {
   // Create a new snoowrap requester with OAuth credentials.
   // For more information on getting credentials, see here: https://github.com/not-an-aardvark/reddit-oauth-helper
-  return new snoowrap({
+  let r = new snoowrap({
     userAgent: config.user.userAgent,
     refreshToken: config.user.refreshToken,
     clientId: config.user.clientId,
     clientSecret: config.user.clientSecret
   })
-}
 
-let main = () => {
-  let conn = init(config)
-  search(start, end, subreddits, conn)
+  search(r)
 }
 
 main()
