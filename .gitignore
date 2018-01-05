@@ -3,6 +3,7 @@
 *.bin
 *.exe
 *.out
+*.json
 /output
 /manual
 /node_modules
