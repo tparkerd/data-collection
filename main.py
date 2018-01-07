@@ -20,8 +20,9 @@ import time
 # Time converter: https://www.epochconverter.com/
 # START = 1509854400 # 5 Nov 2017 @ 00:00:00 EST
 # END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
-START = 1483228800 # 5 Nov 2017 @ 00:00:00 GMT
-END = 1514764799 # 11 Nov 2017 @ 23:59:59 GMT
+START = 1451624400 # Friday, January 1, 2016 12:00:00 AM EST
+# END = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
+END = 1451642400 # Sunday, January 1, 2017 12:00:00 AM EST
 
 # Subreddits to pull data from
 # https://anvaka.github.io/redsim/
@@ -35,7 +36,81 @@ config.read('credentials.ini')
 host = config['db']['host']
 username = config['db']['username']
 password = config['db']['password']
-database = config['db']['database']
+database = config['db']['dbname']
+
+print(', '.join(SUBREDDITS))
+FIELDS = [ 'approved_at_utc',
+ 'approved_by',
+ 'archived',
+ 'author',
+ 'author_flair_css_class',
+ 'author_flair_text',
+ 'banned_at_utc',
+ 'banned_by',
+ 'block',
+ 'body',
+ 'body_html',
+ 'can_gild',
+ 'can_mod_post',
+ 'clear_vote',
+ 'collapse',
+ 'collapsed',
+ 'collapsed_reason',
+ 'controversiality',
+ 'created',
+ 'created_utc',
+ 'delete',
+ 'depth',
+ 'disable_inbox_replies',
+ 'distinguished',
+ 'downs',
+ 'downvote',
+ 'edit',
+ 'edited',
+ 'enable_inbox_replies',
+ 'fullname',
+ 'gild',
+ 'gilded',
+ 'id',
+ 'is_root',
+ 'is_submitter',
+ 'likes',
+ 'link_id',
+ 'mark_read',
+ 'mark_unread',
+ 'mod',
+ 'mod_note',
+ 'mod_reason_by',
+ 'mod_reason_title',
+ 'mod_reports',
+ 'name',
+ 'num_reports',
+ 'parent',
+ 'parent_id',
+ 'parse',
+ 'permalink',
+ 'refresh',
+ 'removal_reason',
+ 'replies',
+ 'reply',
+ 'report',
+ 'report_reasons',
+ 'save',
+ 'saved',
+ 'score',
+ 'score_hidden',
+ 'stickied',
+ 'submission',
+ 'subreddit',
+ 'subreddit_id',
+ 'subreddit_name_prefixed',
+ 'subreddit_type',
+ 'uncollapse',
+ 'unsave',
+ 'ups',
+ 'upvote',
+ 'user_reports']
+VALUES =
 
 def createTables():
     db = MySQLdb.connect(host, username, password, database)
@@ -45,7 +120,7 @@ def createTables():
     cursor.execute("DROP TABLE IF EXISTS posts")
 
     sql = """ CREATE TABLE posts(
-                id INTEGER(11) NOT NULL AUTO_INCREMENT,
+                _id INTEGER(11) NOT NULL AUTO_INCREMENT,
                 created VARCHAR(32),
                 created_utc VARCHAR(32),
                 domain VARCHAR(64),
@@ -55,7 +130,7 @@ def createTables():
                 gilded VARCHAR(12),
                 hidden VARCHAR(12),
                 hide_score VARCHAR(12),
-                _id VARCHAR(32),
+                id VARCHAR(32),
                 is_reddit_media_domain VARCHAR(12),
                 is_self VARCHAR(12),
                 is_video VARCHAR(12),
@@ -90,7 +165,7 @@ def createTables():
                 user_reports VARCHAR(64),
                 view_count INTEGER(11),
                 visited VARCHAR(12),
-                CONSTRAINT PRIMARY KEY (id));
+                CONSTRAINT PRIMARY KEY (_id)) ENGINE = INNODB;
               """
 
     cursor.execute(sql)
@@ -151,6 +226,7 @@ def search(sub):
         e = i + (18000) # 5 hours
         query = 'timestamp:%s..%s' % (s, e)
         search_results = sub.search(query, syntax='cloudsearch')
+        print(dir(search_results))
         for post in search_results:
             print(post.subreddit_name_prefixed + ': ' + post.title)
             postId = insertSubmission(post)
@@ -169,7 +245,7 @@ def init():
 
 def main():
     reddit = init()
-    createTable()
+    createTables()
     for sub in SUBREDDITS:
         search(reddit.subreddit(sub))
 
