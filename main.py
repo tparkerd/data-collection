@@ -195,6 +195,7 @@ def createTables():
     db.close()
 
 def insertSubmission(submission):
+    global postcount
     data = {}
 
     # Clear out None values and assume null
@@ -224,6 +225,7 @@ def insertSubmission(submission):
 
     # Skip deleted text
     if data['content_text'] == '[deleted]':
+        postcount = postcount - 1
         return
 
     # data.author = data.author.name
@@ -302,7 +304,6 @@ def insertSubmission(submission):
         cursor.close()
         db.close()
 
-
 def search(sub):
     # begin = 1483228800; ## Jan 1, 2017 @ 00:00:00 UTC
     # END = begin + 3600 ## increment by 1 hour
@@ -320,6 +321,7 @@ def search(sub):
             for top_level_comment in post.comments:
                 if isinstance(top_level_comment, MoreComments):
                     continue
+                postcount = postcount + 1
                 print(str(postcount) + ')\t[Comment]\t' + top_level_comment.body[:25]+ '\thttps://www.reddit.com' + top_level_comment.permalink)
                 insertSubmission(top_level_comment)
         i = i + (18000) # 5 hours
