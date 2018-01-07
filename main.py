@@ -8,6 +8,7 @@
 # that are likely to suffer from depression or at-risk conditions.
 
 import praw
+from praw.models import MoreComments
 import configparser
 import json
 import datetime
@@ -21,8 +22,9 @@ import time
 # START = 1509854400 # 5 Nov 2017 @ 00:00:00 EST
 # END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
 START = 1451624400 # Friday, January 1, 2016 12:00:00 AM EST
-# END = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
-END = 1451642400 # Sunday, January 1, 2017 12:00:00 AM EST
+END = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
+# END = 1451642400 # Sunday, January 1, 2017 12:00:00 AM EST
+postcount = 0
 
 # Subreddits to pull data from
 # https://anvaka.github.io/redsim/
@@ -38,8 +40,8 @@ username = config['db']['username']
 password = config['db']['password']
 database = config['db']['dbname']
 
-print(', '.join(SUBREDDITS))
-FIELDS = [ 'approved_at_utc',
+# Name of columns in the table
+FIELDS = ['approved_at_utc',
  'approved_by',
  'archived',
  'author',
@@ -47,191 +49,279 @@ FIELDS = [ 'approved_at_utc',
  'author_flair_text',
  'banned_at_utc',
  'banned_by',
- 'block',
- 'body',
- 'body_html',
  'can_gild',
  'can_mod_post',
- 'clear_vote',
- 'collapse',
- 'collapsed',
- 'collapsed_reason',
- 'controversiality',
  'created',
  'created_utc',
- 'delete',
- 'depth',
- 'disable_inbox_replies',
  'distinguished',
  'downs',
- 'downvote',
- 'edit',
  'edited',
- 'enable_inbox_replies',
- 'fullname',
- 'gild',
  'gilded',
  'id',
- 'is_root',
- 'is_submitter',
  'likes',
- 'link_id',
- 'mark_read',
- 'mark_unread',
- 'mod',
  'mod_note',
  'mod_reason_by',
  'mod_reason_title',
- 'mod_reports',
  'name',
  'num_reports',
- 'parent',
- 'parent_id',
- 'parse',
  'permalink',
- 'refresh',
  'removal_reason',
- 'replies',
- 'reply',
- 'report',
  'report_reasons',
- 'save',
  'saved',
  'score',
- 'score_hidden',
  'stickied',
- 'submission',
  'subreddit',
  'subreddit_id',
  'subreddit_name_prefixed',
  'subreddit_type',
- 'uncollapse',
- 'unsave',
  'ups',
- 'upvote',
- 'user_reports']
-VALUES =
+ 'num_comments',
+ 'pinned',
+ 'selftext_html',
+ 'title',
+ 'url',
+ 'view_count',
+ 'body',
+ 'depth',
+ 'parent_id',
+ 'content_text',
+ 'submission_type']
+
+# Build query string
+def buildQueryString(fields, values):
+    sql = """INSERT INTO posts"""
+    cFields = len(fields)
+
+    # Convert strings to be actual strings in the query text
+    stringFields = ['approved_by',
+        'author',
+        'author_flair_css_class',
+        'author_flair_text',
+        'banned_by',
+        'id',
+        'mod_note',
+        'mod_reason_by',
+        'mod_reason_title',
+        'name',
+        'permalink',
+        'removal_reason',
+        'report_reasons',
+        'subreddit',
+        'subreddit_id',
+        'subreddit_name_prefixed',
+        'subreddit_type',
+        'selftext_html',
+        'title',
+        'url',
+        'body',
+        'parent_id',
+        'content_text',
+        'submission_type'
+    ]
+
+    # For each value, see if it's a string
+    for n, i in enumerate(fields):
+        if values[n] != 'null' and i in stringFields:
+            values[n] = ''.join(['\'', values[n], '\''])
+
+    fields = ', '.join(''.join(['`', field, '`']) for field in fields) + ')'
+    values = ', '.join(values)
+    sql = ''.join([sql, '(', fields, ' VALUES(', values, ')'])
+    return sql
+
+
 
 def createTables():
     db = MySQLdb.connect(host, username, password, database)
     cursor = db.cursor()
-
-    cursor.execute("DROP TABLE IF EXISTS comments")
     cursor.execute("DROP TABLE IF EXISTS posts")
 
     sql = """ CREATE TABLE posts(
-                _id INTEGER(11) NOT NULL AUTO_INCREMENT,
-                created VARCHAR(32),
-                created_utc VARCHAR(32),
-                domain VARCHAR(64),
-                downs INTEGER(11),
-                edited VARCHAR(12),
-                fullname VARCHAR(128),
-                gilded VARCHAR(12),
-                hidden VARCHAR(12),
-                hide_score VARCHAR(12),
-                id VARCHAR(32),
-                is_reddit_media_domain VARCHAR(12),
-                is_self VARCHAR(12),
-                is_video VARCHAR(12),
-                likes INTEGER(11),
-                locked VARCHAR(12),
-                media VARCHAR(64),
-                media_embed VARCHAR(64),
-                mod_reports VARCHAR(64),
-                name VARCHAR(32),
-                num_comments INTEGER(11),
-                num_crossposts INTEGER(11),
-                num_reports INTEGER(11),
-                over_18 VARCHAR(12),
-                permalink VARCHAR(128),
-                pinned VARCHAR(12),
-                quarantine VARCHAR(12),
-                removal_reason VARCHAR(64),
-                report_reasons VARCHAR(64),
-                saved VARCHAR(12),
-                score INTEGER(11),
-                secure_media VARCHAR(64),
-                secure_media_embed VARCHAR(64),
-                selftext TEXT(12000),
-                shortlink VARCHAR(64),
-                subreddit_id VARCHAR(64),
-                subreddit_name_prefixed VARCHAR(64),
-                subreddit_type VARCHAR(64),
-                thumbnail VARCHAR(64),
-                title VARCHAR(512),
-                ups INTEGER(11),
-                url VARCHAR(512),
-                user_reports VARCHAR(64),
-                view_count INTEGER(11),
-                visited VARCHAR(12),
-                CONSTRAINT PRIMARY KEY (_id)) ENGINE = INNODB;
+                    _id INTEGER(11) NOT NULL AUTO_INCREMENT,
+                    approved_at_utc DATETIME,
+                    approved_by VARCHAR(64),
+                    archived BOOLEAN,
+                    author VARCHAR(64),
+                    author_flair_css_class VARCHAR(64),
+                    author_flair_text VARCHAR(64),
+                    banned_at_utc DATETIME,
+                    banned_by VARCHAR(64),
+                    can_gild BOOLEAN,
+                    can_mod_post BOOLEAN,
+                    created DATETIME,
+                    created_utc DATETIME,
+                    distinguished BOOLEAN,
+                    downs INTEGER(11),
+                    edited BOOLEAN,
+                    gilded BOOLEAN,
+                    id VARCHAR(64),
+                    likes INTEGER(11),
+                    mod_note VARCHAR(64),
+                    mod_reason_by VARCHAR(64),
+                    mod_reason_title VARCHAR(64),
+                    name VARCHAR(64),
+                    num_reports INTEGER(11),
+                    permalink VARCHAR(128),
+                    removal_reason VARCHAR(128),
+                    report_reasons VARCHAR(64),
+                    saved BOOLEAN,
+                    score INTEGER(11),
+                    stickied BOOLEAN,
+                    subreddit VARCHAR(64),
+                    subreddit_id VARCHAR(64),
+                    subreddit_name_prefixed VARCHAR(64),
+                    subreddit_type VARCHAR(64),
+                    ups INTEGER(11),
+
+                    num_comments INTEGER(11),
+                    pinned BOOLEAN,
+                    selftext_html TEXT(12000),
+                    title VARCHAR(512),
+                    url VARCHAR(512),
+                    view_count INTEGER(11),
+
+                    body TEXT(12000),
+                    depth INTEGER(11),
+                    parent_id VARCHAR(64),
+
+                    content_text TEXT(12000),
+                    submission_type VARCHAR(35),
+                    CONSTRAINT PRIMARY KEY (_id)
+                ) ENGINE = INNODB
               """
 
-    cursor.execute(sql)
-
-    sql = """ CREATE TABLE comments(
-                id INTEGER(11) NOT NULL AUTO_INCREMENT,
-                parent_post INTEGER(11) NOT NULL,
-                body TEXT(12000),
-                ups VARCHAR(11),
-                downs VARCHAR(11),
-                CONSTRAINT PRIMARY KEY (id),
-                CONSTRAINT FOREIGN KEY (parent_post) REFERENCES posts(id)
-                ON DELETE CASCADE
-                ON UPDATE CASCADE);"""
     cursor.execute(sql)
     cursor.close()
     db.close()
 
 def insertSubmission(submission):
-    data = submission
-    query = ("INSERT INTO posts(title, created_utc, domain, downs, ups, edited, fullname, _id, num_comments, score, selftext, subreddit_id, subreddit_name_prefixed, url) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (re.escape(data.title), data.created_utc, data.domain, data.downs, data.ups, data.edited, data.fullname, data.id, data.num_comments, data.score, re.escape(data.selftext), data.subreddit_id, data.subreddit_name_prefixed, data.url))
-    postId = -1
+    data = {}
+
+    # Clear out None values and assume null
+    for attr, value in submission.__dict__.items():
+        data[attr] = str(value)
+        if value is None:
+            data[attr] = 'null'
+
+    data['submission_type'] = type(submission).__name__
+    if type(submission).__name__ is 'Submission':
+        data['body'] = 'null'
+        data['depth'] = 'null'
+        data['parent_id'] = 'null'
+        data['content_text'] = submission.selftext
+
+    if type(submission).__name__ is 'Comment':
+        data['selftext'] = 'null'
+        data['selftext_html'] = 'null'
+        data['content_text'] = submission.body
+        data['num_comments'] = 'null'
+        data['pinned'] = 'null'
+        data['title'] = 'null'
+        data['url'] = 'null'
+        data['view_count'] = 'null'
+
+    data['permalink'] = 'https://www.reddit.com' + submission.permalink
+
+    # Skip deleted text
+    if data['content_text'] == '[deleted]':
+        return
+
+    # data.author = data.author.name
+    # data['author']
+    # data.subreddit = data.subreddit.display_name
+    # data.content_text = data.body || data.selftext
+    # data.body = data.body || null
+
+    # data.selftext = data.selftext || null
+    # data.depth = data.depth || null
+    # data.parent_id = data.parent_id || null
+    # data.num_comments = data.num_comments || 0
+    # data.pinned = data.pinned || false
+    # data.selftext_html = data.selftext_html || null
+    # data.title = data.title || null
+    # data.url = data.url ||  ('https://www.reddit.com' + data.permalink) || null
+    # data.view_count = data.view_count || null
+
+    values = [
+        ''.join([ 'FROM_UNIXTIME(', data['approved_at_utc'], ')']),
+        data['approved_by'],
+        data['archived'],
+        data['author'],
+        data['author_flair_css_class'],
+        data['author_flair_text'],
+        ''.join([ 'FROM_UNIXTIME(', data['banned_at_utc'], ')']),
+        data['banned_by'],
+        data['can_gild'],
+        data['can_mod_post'],
+        ''.join([ 'FROM_UNIXTIME(', data['created'], ')']),
+        ''.join([ 'FROM_UNIXTIME(', data['created_utc'], ')']),
+        data['distinguished'],
+        data['downs'],
+        data['edited'],
+        data['gilded'],
+        data['id'],
+        data['likes'],
+        data['mod_note'],
+        data['mod_reason_by'],
+        data['mod_reason_title'],
+        data['name'],
+        data['num_reports'],
+        data['permalink'],
+        data['removal_reason'],
+        data['report_reasons'],
+        data['saved'],
+        data['score'],
+        data['stickied'],
+        data['subreddit'],
+        data['subreddit_id'],
+        data['subreddit_name_prefixed'],
+        data['subreddit_type'],
+        data['ups'],
+        data['num_comments'],
+        data['pinned'],
+        data['selftext_html'],
+        data['title'],
+        data['url'],
+        data['view_count'],
+        data['body'],
+        data['depth'],
+        data['parent_id'],
+        data['content_text'],
+        data['submission_type']
+    ]
+    sql = buildQueryString(FIELDS, values)
 
     try:
         db = MySQLdb.connect(host, username, password, database)
         cursor = db.cursor()
-        cursor.execute(query)
-        postId = db.insert_id()
+        cursor.execute(sql)
         db.commit()
     except:
         db.rollback()
     finally:
         cursor.close()
         db.close()
-        return postId
 
-def insertComments(submission, postId):
-        try:
-            db = MySQLdb.connect(host, username, password, database)
-            cursor = db.cursor()
-            # Get the comments for the entire post
-            for c in submission.comments:
-                query = (("""INSERT INTO comments(parent_post, body, ups, downs) VALUES ('%s', '%s', '%s', '%s');""") % (postId, c.body, c.ups, c.downs))
-                cursor.execute(query)
-            db.commit()
-        except:
-            db.rollback()
-        finally:
-            cursor.close()
-            db.close()
 
 def search(sub):
     # begin = 1483228800; ## Jan 1, 2017 @ 00:00:00 UTC
     # END = begin + 3600 ## increment by 1 hour
+    global postcount
     i = START
     while (i < END):
         s = i
         e = i + (18000) # 5 hours
         query = 'timestamp:%s..%s' % (s, e)
         search_results = sub.search(query, syntax='cloudsearch')
-        print(dir(search_results))
         for post in search_results:
-            print(post.subreddit_name_prefixed + ': ' + post.title)
-            postId = insertSubmission(post)
-            if not postId == -1:
-                insertComments(post, postId)
+            postcount = postcount + 1
+            print(str(postcount) + ')\t[Submission]\t' + post.title[:25] + '\thttps://www.reddit.com' + post.permalink)
+            insertSubmission(post)
+            for top_level_comment in post.comments:
+                if isinstance(top_level_comment, MoreComments):
+                    continue
+                print(str(postcount) + ')\t[Comment]\t' + top_level_comment.body[:25]+ '\thttps://www.reddit.com' + top_level_comment.permalink)
+                insertSubmission(top_level_comment)
         i = i + (18000) # 5 hours
         time.sleep(2)
 
@@ -250,5 +340,5 @@ def main():
         search(reddit.subreddit(sub))
 
 
-# createTables()
+createTables()
 main()
