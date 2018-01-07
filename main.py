@@ -31,6 +31,7 @@ postcount = 0
 # https://anvaka.github.io/redsim/
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
+SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "selfharm", "confession", "bipolar", "bipolarreddit", "stopselfharm", "mentalhealth" ]
 
 # Open up the config file and read it's contents
 config = configparser.ConfigParser()
@@ -131,8 +132,6 @@ def buildQueryString(fields, values):
     values = ', '.join(values)
     sql = ''.join([sql, '(', fields, ' VALUES(', values, ')'])
     return sql
-
-
 
 def createTables():
     db = MySQLdb.connect(host, username, password, database)
@@ -245,7 +244,7 @@ def insertSubmission(submission):
         return
 
     postcount = postcount + 1
-    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['content_text'][:25] + '\t' + data['permalink'])
+    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['permalink'])
 
 
     # data.author = data.author.name
