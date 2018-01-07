@@ -16,6 +16,7 @@ import os
 import MySQLdb
 import re
 import time
+import sys
 
 # Start and end times for the set of queries you want to search
 # Time converter: https://www.epochconverter.com/
@@ -206,15 +207,28 @@ def insertSubmission(submission):
 
     data['submission_type'] = type(submission).__name__
     if type(submission).__name__ is 'Submission':
+        if submission.selftext_html is None:
+            submission.selftext_html = 'null'
+        if submission.selftext is None:
+            submission.selftext = 'null'
+        if submission.title is None:
+            submission.title = 'null'
         data['body'] = 'null'
         data['depth'] = 'null'
         data['parent_id'] = 'null'
-        data['content_text'] = submission.selftext
+        data['selftext'] = re.escape(submission.selftext)
+        data['selftext_html'] = re.escape(submission.selftext_html)
+        data['content_text'] = re.escape(submission.selftext)
+        data['title'] = re.escape(submission.title)
+
 
     if type(submission).__name__ is 'Comment':
         data['selftext'] = 'null'
         data['selftext_html'] = 'null'
-        data['content_text'] = submission.body
+        if submission.body is None:
+            submission.body = 'null'
+        data['content_text'] = re.escape(submission.body)
+        data['body'] = re.escape(submission.body)
         data['num_comments'] = 'null'
         data['pinned'] = 'null'
         data['title'] = 'null'
@@ -225,8 +239,11 @@ def insertSubmission(submission):
 
     # Skip deleted text
     if data['content_text'] == '[deleted]':
-        postcount = postcount - 1
         return
+
+    postcount = postcount + 1
+    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['content_text'][:25] + '\t' + data['permalink'])
+
 
     # data.author = data.author.name
     # data['author']
@@ -299,6 +316,7 @@ def insertSubmission(submission):
         cursor.execute(sql)
         db.commit()
     except:
+        print('SQL Error occurred')
         db.rollback()
     finally:
         cursor.close()
@@ -315,14 +333,10 @@ def search(sub):
         query = 'timestamp:%s..%s' % (s, e)
         search_results = sub.search(query, syntax='cloudsearch')
         for post in search_results:
-            postcount = postcount + 1
-            print(str(postcount) + ')\t[Submission]\t' + post.title[:25] + '\thttps://www.reddit.com' + post.permalink)
             insertSubmission(post)
             for top_level_comment in post.comments:
                 if isinstance(top_level_comment, MoreComments):
                     continue
-                postcount = postcount + 1
-                print(str(postcount) + ')\t[Comment]\t' + top_level_comment.body[:25]+ '\thttps://www.reddit.com' + top_level_comment.permalink)
                 insertSubmission(top_level_comment)
         i = i + (18000) # 5 hours
         time.sleep(2)
