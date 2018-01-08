@@ -22,9 +22,9 @@ import sys
 # Time converter: https://www.epochconverter.com/
 # START = 1509854400 # 5 Nov 2017 @ 00:00:00 EST
 # END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
-START = 1451624400 # Friday, January 1, 2016 12:00:00 AM EST
-END = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
-# END = 1451642400 # Sunday, January 1, 2017 12:00:00 AM EST
+START = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
+END = 1514782800 # Monday, January 1, 2018 12:00:00 AM EST
+# END = 1451642400 # Monday, January 1, 2017 12:00:00 AM EST
 postcount = 0
 
 # Subreddits to pull data from
@@ -32,7 +32,7 @@ postcount = 0
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "selfharm", "confession", "bipolar", "bipolarreddit", "stopselfharm", "mentalhealth" ]
-
+SUBREDDITS = [ "depression" ]
 # Open up the config file and read it's contents
 config = configparser.ConfigParser()
 config.sections()
@@ -207,6 +207,14 @@ def insertSubmission(submission):
         if value is None:
             data[attr] = 'null'
 
+    if (type(submission.author) is not None):
+        data['author'] = re.escape(submission.author.name)
+    if (type(submission.author_flair_css_class) is not None):
+        data['author_flair_css_class'] = re.escape(submission.author_flair_css_class)
+    if (type(submission.author_flair_text) is not None):
+        data['author_flair_text'] = re.escape(submission.author_flair_text)
+
+
     data['submission_type'] = type(submission).__name__
     if type(submission).__name__ is 'Submission':
         if submission.selftext_html is None:
@@ -245,23 +253,6 @@ def insertSubmission(submission):
 
     postcount = postcount + 1
     print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['permalink'])
-
-
-    # data.author = data.author.name
-    # data['author']
-    # data.subreddit = data.subreddit.display_name
-    # data.content_text = data.body || data.selftext
-    # data.body = data.body || null
-
-    # data.selftext = data.selftext || null
-    # data.depth = data.depth || null
-    # data.parent_id = data.parent_id || null
-    # data.num_comments = data.num_comments || 0
-    # data.pinned = data.pinned || false
-    # data.selftext_html = data.selftext_html || null
-    # data.title = data.title || null
-    # data.url = data.url ||  ('https://www.reddit.com' + data.permalink) || null
-    # data.view_count = data.view_count || null
 
     values = [
         ''.join([ 'FROM_UNIXTIME(', data['approved_at_utc'], ')']),
@@ -320,16 +311,17 @@ def insertSubmission(submission):
         db.commit()
     except:
         print('SQL Error occurred')
+        with open("error.log", "a") as logFile:
+            logFile.write(sql + "\n")
         db.rollback()
     finally:
         cursor.close()
         db.close()
 
 def search(sub):
-    # begin = 1483228800; ## Jan 1, 2017 @ 00:00:00 UTC
-    # END = begin + 3600 ## increment by 1 hour
     global postcount
     i = START
+    print
     while (i < END):
         s = i
         e = i + (18000) # 5 hours
@@ -358,6 +350,4 @@ def main():
     for sub in SUBREDDITS:
         search(reddit.subreddit(sub))
 
-
-createTables()
 main()
