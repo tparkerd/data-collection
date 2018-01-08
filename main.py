@@ -33,6 +33,7 @@ postcount = 0
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "selfharm", "confession", "bipolar", "bipolarreddit", "stopselfharm", "mentalhealth" ]
 SUBREDDITS = [ "depression" ]
+
 # Open up the config file and read it's contents
 config = configparser.ConfigParser()
 config.sections()
@@ -207,11 +208,13 @@ def insertSubmission(submission):
         if value is None:
             data[attr] = 'null'
 
-    if (type(submission.author) is not None):
+
+
+    if ((submission.author) is not None):
         data['author'] = re.escape(submission.author.name)
-    if (type(submission.author_flair_css_class) is not None):
+    if ((submission.author_flair_css_class) is not None):
         data['author_flair_css_class'] = re.escape(submission.author_flair_css_class)
-    if (type(submission.author_flair_text) is not None):
+    if ((submission.author_flair_text) is not None):
         data['author_flair_text'] = re.escape(submission.author_flair_text)
 
 
