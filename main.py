@@ -136,8 +136,13 @@ def buildQueryString(fields, values):
     return sql
 
 def createTables():
-    db = MySQLdb.connect(host, username, password, database)
+    # try:
+
+    db = MySQLdb.connect(host, username, password)
     cursor = db.cursor()
+    cursor.execute("DROP DATABASE IF EXISTS reddit")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS reddit")
+    cursor.execute("USE reddit")
     cursor.execute("DROP TABLE IF EXISTS posts")
 
     sql = """ CREATE TABLE posts(
@@ -156,7 +161,7 @@ def createTables():
                     created_utc DATETIME,
                     distinguished VARCHAR(32),
                     downs INTEGER(11),
-                    edited BOOLEAN,
+                    edited DATETIME,
                     gilded BOOLEAN,
                     id VARCHAR(64),
                     likes INTEGER(11),
@@ -176,7 +181,6 @@ def createTables():
                     subreddit_name_prefixed VARCHAR(64),
                     subreddit_type VARCHAR(64),
                     ups INTEGER(11),
-
                     num_comments INTEGER(11),
                     pinned BOOLEAN,
                     selftext TEXT(12000),
@@ -184,11 +188,9 @@ def createTables():
                     title VARCHAR(512),
                     url VARCHAR(512),
                     view_count INTEGER(11),
-
                     body TEXT(12000),
                     depth INTEGER(11),
                     parent_id VARCHAR(64),
-
                     content_text TEXT(12000),
                     submission_type VARCHAR(35),
                     CONSTRAINT PRIMARY KEY (_id)
@@ -219,6 +221,12 @@ def insertSubmission(submission):
         data['author_flair_text'] = re.escape(submission.author_flair_text)
     if ((submission.distinguished) is not None):
         data['distinguished'] = re.escape(submission.distinguished)
+
+    # Catch edit field that has datatime instead of boolean value
+    if ((submission.edited) is not None):
+        print(type(submission.edited))
+        if (submission.edited == False):
+            submission.edited = 'null'
 
 
     data['submission_type'] = type(submission).__name__
@@ -258,7 +266,7 @@ def insertSubmission(submission):
         return
 
     postcount = postcount + 1
-    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['permalink'])
+    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + str(submission.edited) + '\t' + data['permalink'])
 
     values = [
         ''.join([ 'FROM_UNIXTIME(', data['approved_at_utc'], ')']),
@@ -275,7 +283,7 @@ def insertSubmission(submission):
         ''.join([ 'FROM_UNIXTIME(', data['created_utc'], ')']),
         data['distinguished'],
         data['downs'],
-        data['edited'],
+        ''.join([ 'FROM_UNIXTIME(', data['edited'], ')']),
         data['gilded'],
         data['id'],
         data['likes'],
@@ -315,7 +323,7 @@ def insertSubmission(submission):
         cursor = db.cursor()
         cursor.execute(sql)
         db.commit()
-    except:
+    except Exception as e:
         print('SQL Error occurred')
         with open("error.log", "a") as logFile:
             logFile.write(sql + "\n")
