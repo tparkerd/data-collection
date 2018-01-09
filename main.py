@@ -41,7 +41,7 @@ config.read('credentials.ini')
 host = config['db']['host']
 username = config['db']['username']
 password = config['db']['password']
-database = config['db']['dbname']
+database = config['db']['name']
 
 # Name of columns in the table
 FIELDS = ['approved_at_utc',
@@ -102,6 +102,7 @@ def buildQueryString(fields, values):
         'author_flair_css_class',
         'author_flair_text',
         'banned_by',
+        'distinguished',
         'id',
         'mod_note',
         'mod_reason_by',
@@ -153,7 +154,7 @@ def createTables():
                     can_mod_post BOOLEAN,
                     created DATETIME,
                     created_utc DATETIME,
-                    distinguished BOOLEAN,
+                    distinguished VARCHAR(32),
                     downs INTEGER(11),
                     edited BOOLEAN,
                     gilded BOOLEAN,
@@ -216,6 +217,8 @@ def insertSubmission(submission):
         data['author_flair_css_class'] = re.escape(submission.author_flair_css_class)
     if ((submission.author_flair_text) is not None):
         data['author_flair_text'] = re.escape(submission.author_flair_text)
+    if ((submission.distinguished) is not None):
+        data['distinguished'] = re.escape(submission.distinguished)
 
 
     data['submission_type'] = type(submission).__name__
