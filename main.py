@@ -24,7 +24,8 @@ import sys
 # END = 1510462799 # 11 Nov 2017 @ 23:59:59 EST
 START = 1483246800 # Sunday, January 1, 2017 12:00:00 AM EST
 END = 1514782800 # Monday, January 1, 2018 12:00:00 AM EST
-# END = 1451642400 # Monday, January 1, 2017 12:00:00 AM EST
+
+# Global post counter
 postcount = 0
 
 # Subreddits to pull data from
@@ -32,7 +33,7 @@ postcount = 0
 # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
 SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "selfharm", "confession", "bipolar", "bipolarreddit", "stopselfharm", "mentalhealth" ]
-SUBREDDITS = [ "depression" ]
+SUBREDDITS = [ "depression" ] # Only pull from r/depression for now
 
 # Open up the config file and read it's contents
 config = configparser.ConfigParser()
@@ -143,7 +144,6 @@ def createTables():
     cursor.execute("DROP DATABASE IF EXISTS reddit")
     cursor.execute("CREATE DATABASE IF NOT EXISTS reddit")
     cursor.execute("USE reddit")
-    cursor.execute("DROP TABLE IF EXISTS posts")
 
     sql = """ CREATE TABLE posts(
                     _id INTEGER(11) NOT NULL AUTO_INCREMENT,
@@ -211,8 +211,7 @@ def insertSubmission(submission):
         if value is None:
             data[attr] = 'null'
 
-
-
+    # Escape universal values
     if ((submission.author) is not None):
         data['author'] = re.escape(submission.author.name)
     if ((submission.author_flair_css_class) is not None):
@@ -224,11 +223,10 @@ def insertSubmission(submission):
 
     # Catch edit field that has datatime instead of boolean value
     if ((submission.edited) is not None):
-        print(type(submission.edited))
         if (submission.edited == False):
             submission.edited = 'null'
 
-
+    # Escape and 'zero-out' values for submissions
     data['submission_type'] = type(submission).__name__
     if type(submission).__name__ is 'Submission':
         if submission.selftext_html is None:
@@ -245,7 +243,7 @@ def insertSubmission(submission):
         data['content_text'] = re.escape(submission.selftext)
         data['title'] = re.escape(submission.title)
 
-
+    # Escape and 'zero-out' values for comments
     if type(submission).__name__ is 'Comment':
         data['selftext'] = 'null'
         data['selftext_html'] = 'null'
@@ -262,12 +260,14 @@ def insertSubmission(submission):
     data['permalink'] = 'https://www.reddit.com' + submission.permalink
 
     # Skip deleted text
-    if data['content_text'] == '[deleted]':
+    if data['content_text'] == '[deleted]' or data['selftext'] == '[deleted]':
         return
 
+    # Increment the number of posts that have been counted
     postcount = postcount + 1
-    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + str(submission.edited) + '\t' + data['permalink'])
+    print(str(postcount) + ') ' + type(submission).__name__ + '\t' + data['permalink'])
 
+    # Parse values and set values
     values = [
         ''.join([ 'FROM_UNIXTIME(', data['approved_at_utc'], ')']),
         data['approved_by'],
@@ -316,14 +316,17 @@ def insertSubmission(submission):
         data['content_text'],
         data['submission_type']
     ]
+    # Construct the SQL query as a string
     sql = buildQueryString(FIELDS, values)
 
+    # Attempt to run query
     try:
         db = MySQLdb.connect(host, username, password, database)
         cursor = db.cursor()
         cursor.execute(sql)
         db.commit()
     except Exception as e:
+        postcount = postcount - 1 # error occurred so reduce the number of valid posts
         print('SQL Error occurred')
         with open("error.log", "a") as logFile:
             logFile.write(sql + "\n")
@@ -335,10 +338,9 @@ def insertSubmission(submission):
 def search(sub):
     global postcount
     i = START
-    print
     while (i < END):
         s = i
-        e = i + (18000) # 5 hours
+        e = i + (18000) # +5 hours
         query = 'timestamp:%s..%s' % (s, e)
         search_results = sub.search(query, syntax='cloudsearch')
         for post in search_results:
