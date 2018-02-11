@@ -196,7 +196,7 @@ class DataCollector:
 
         # Clear out None values and assume null
         for attr, value in submission.__dict__.items():
-            data[attr] = str(value)
+            data[attr] = value.encoce('utf-8').strip()
             if value is None:
                 data[attr] = 'null'
 
