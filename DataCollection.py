@@ -11,13 +11,14 @@
 import praw
 from praw.models import MoreComments
 import configparser
-import json
+import argparse
 from datetime import datetime
 import os
 import MySQLdb
 import re
 import time
 import sys
+
 
 class DataCollection:
 
@@ -378,8 +379,9 @@ if __name__ == '__main__':
     s = re.sub(pattern, '', s)
     print(s)
 
-    # parser = argparse.ArgumentParser(description='Filters and analyzes using Vader Sentiment Analyzer')
-    # parser.add_argument('-o', type=str, default='out.csv', help='Name the output file.')
-    # parser.add_argument('-db', type=str, default='', help='Specify database name ')
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='Filters and analyzes using Vader Sentiment Analyzer')
+    parser.add_argument('-o', type=str, default='out.csv', help='Does nothing.')
+    parser.add_argument('-db', type=str, default='', help='Specify database name ')
+    args = parser.parse_args()
+    print(args)
     # VaderFilter().main(outputFileName = args.o, sql = args.sql)
