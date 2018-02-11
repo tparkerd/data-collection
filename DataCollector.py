@@ -196,9 +196,11 @@ class DataCollector:
 
         # Clear out None values and assume null
         for attr, value in submission.__dict__.items():
-            data[attr] = value.encode('utf-8').strip()
             if value is None:
                 data[attr] = 'null'
+            else:
+                data[attr] = str(value)
+
 
         # Escape universal values
         if ((submission.author) is not None):
