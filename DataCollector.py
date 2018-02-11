@@ -126,9 +126,6 @@ class DataCollector:
         return sql
 
     def createTables(self):
-        # try:
-        print('create tables')
-
         db = MySQLdb.connect(self.host, self.username, self.password)
         cursor = db.cursor()
         cursor.execute("DROP DATABASE IF EXISTS {}".format(self.database))
@@ -327,10 +324,6 @@ class DataCollector:
             db.close()
 
     def search(self, subreddit, start, end):
-        start /= 10
-        start = 1483246800
-        end /= 10
-        end = 1514782800
         i = start
         while (i < end):
             s = i
@@ -373,8 +366,8 @@ class DataCollector:
             self.search(reddit.subreddit(sub), args.start, args.end)
 
 epoch = datetime.utcfromtimestamp(0)
-def unix_time_millis(dt):
-    return (datetime.strptime(dt, '%Y-%d-%j') - epoch).total_seconds() * 1000.0
+def unix_time_int(dt):
+    return int((datetime.strptime(dt, '%Y-%d-%j') - epoch).total_seconds())
 
 if __name__ == '__main__':
     # Create a default database name based on the current date and time
@@ -391,6 +384,6 @@ if __name__ == '__main__':
     parser.add_argument('-start', dest='start', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Earliest (starting) time to search for submission. Inclusive.')
     parser.add_argument('-end', dest='end', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Most recent (ending) time to search for submission. Exclusive.')
     args = parser.parse_args()
-    args.start = unix_time_millis(args.start)
-    args.end = unix_time_millis(args.end)
+    args.start = unix_time_int(args.start)
+    args.end = unix_time_int(args.end)
     DataCollector().main(args)
