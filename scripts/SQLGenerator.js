@@ -5,7 +5,7 @@ let pivotTableGen = (rows, cols) => {
   // Create row (unions)
   for (let row = 1; row <= rows; row++) {
     // Row start...
-    console.log(`SELECT ${row} AS counter, COUNT(*) AS countOf`)
+    console.log(`SELECT ${row} AS id, COUNT(*) AS countOf`)
     for (let col = 0; col < cols; col++)
       console.log(`, ${alias[col]}.countOf`)
     console.log(`FROM posts p`);
