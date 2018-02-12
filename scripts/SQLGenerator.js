@@ -16,13 +16,22 @@ let pivotTableGen = (rows, cols) => {
         console.log(`INNER JOIN (
           SELECT ${row} AS tmpid,
           COUNT(*) AS countOf
-          FROM posts p
-          WHERE CHAR_LENGTH(p.content_text) BETWEEN 1 AND 50
-          AND p.score < 1
-        ) AS ${alias[col]} ON ${alias[col]}.tmpid = ${row}`)
+          FROM posts p`)
+          // WHERE CHAR_LENGTH(p.content_text) BETWEEN ${50 * col + 1} AND ${50 * (col + 1)}`)
+
+          if (row === 1)
+          console.log(`WHERE CHAR_LENGTH(p.content_text) < 1 AND p.score < 1`)
+          else {
+            console.log(`WHERE CHAR_LENGTH(p.content_text) < 1 AND p.score BETWEEN ${10 * row + 1} AND ${10 * (row + 1)}`)
+          }
+
+        console.log(`) AS ${alias[col]} ON ${alias[col]}.tmpid = ${row}`)
       }
-      console.log(`WHERE CHAR_LENGTH(p.content_text) < 1
-      AND p.score < 1`)
+      if (row === 1)
+        console.log(`WHERE CHAR_LENGTH(p.content_text) < 1 AND p.score < 1`)
+      else {
+        console.log(`WHERE CHAR_LENGTH(p.content_text) < 1 AND p.score BETWEEN ${10 * row + 1} AND ${10 * (row + 1)}`)
+      }
       // If we haven't reached the last row yet, add a UNION
       if (row < rows)
       console.log(`UNION`)
