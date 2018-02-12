@@ -44,3 +44,6 @@ optional arguments:
 
 nohup ./DataCollector.py -start 2016-01-01 -end 2017-01-01 -sub depression GetMotivated &
 ```
+
+### Extra
+Errors are appended to `error.log` with the SQL that failed.
