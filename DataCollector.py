@@ -23,6 +23,7 @@ import time
 class DataCollector:
     # Global post counter
     postcount = 0
+    errorcount = 0
     host = ''
     username = ''
     password = ''
@@ -79,7 +80,8 @@ class DataCollector:
      'depth',
      'parent_id',
      'content_text',
-     'submission_type']
+     'submission_type',
+     'selfbody_text']
 
     # Build query string
     def buildQueryString(self, fields, values):
@@ -112,7 +114,8 @@ class DataCollector:
             'body',
             'parent_id',
             'content_text',
-            'submission_type'
+            'submission_type',
+            'selfbody_text'
         ]
 
         # For each value, see if it's a string
@@ -180,6 +183,7 @@ class DataCollector:
                         parent_id VARCHAR(64),
                         content_text TEXT(12000),
                         submission_type VARCHAR(35),
+                        selfbody_text VARCHAR(12000),
                         CONSTRAINT PRIMARY KEY (_id)
                     ) ENGINE = INNODB
                   """
@@ -228,7 +232,8 @@ class DataCollector:
             data['parent_id'] = 'null'
             data['selftext'] = re.escape(submission.selftext)
             data['selftext_html'] = re.escape(submission.selftext_html)
-            data['content_text'] = re.escape(submission.selftext)
+            data['content_text'] = re.escape(submission.title) + '. ' + re.escape(submission.selftext)
+            data['selfbody_text'] = re.escape(submission.selftext)
             data['title'] = re.escape(submission.title)
 
         # Escape and 'zero-out' values for comments
@@ -239,6 +244,7 @@ class DataCollector:
                 submission.body = 'null'
             data['content_text'] = re.escape(submission.body)
             data['body'] = re.escape(submission.body)
+            data['selfbody_text'] = re.escape(submission.body)
             data['num_comments'] = 'null'
             data['pinned'] = 'null'
             data['title'] = 'null'
@@ -302,7 +308,8 @@ class DataCollector:
             data['depth'],
             data['parent_id'],
             data['content_text'],
-            data['submission_type']
+            data['submission_type'],
+            data['selfbody_text']
         ]
         # Construct the SQL query as a string
         sql = self.buildQueryString(self.FIELDS, values)
@@ -364,6 +371,8 @@ class DataCollector:
         self.createTables()
         for sub in args.subreddits:
             self.search(reddit.subreddit(sub), args.start, args.end)
+
+        print('Error rate: ' , self.errorcount / self.postcount * 100.0)
 
 epoch = datetime.utcfromtimestamp(0)
 def unix_time_int(dt):
