@@ -183,7 +183,7 @@ class DataCollector:
                         parent_id VARCHAR(64),
                         content_text TEXT(12000),
                         submission_type VARCHAR(35),
-                        selfbody_text VARCHAR(12000),
+                        selfbody_text TEXT(12000),
                         CONSTRAINT PRIMARY KEY (_id)
                     ) ENGINE = INNODB
                   """
