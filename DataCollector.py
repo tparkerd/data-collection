@@ -376,7 +376,7 @@ class DataCollector:
 
 epoch = datetime.utcfromtimestamp(0)
 def unix_time_int(dt):
-    return int((datetime.strptime(dt, '%Y-%d-%j') - epoch).total_seconds())
+    return int((datetime.strptime(dt, '%Y-%m-%d') - epoch).total_seconds())
 
 if __name__ == '__main__':
     # Create a default database name based on the current date and time
