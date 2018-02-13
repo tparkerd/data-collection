@@ -323,7 +323,7 @@ class DataCollector:
         except Exception as e:
             self.postcount = self.postcount - 1 # error occurred so reduce the number of valid posts
             print('SQL Error occurred')
-            errorcount = errorcount + 1
+            self.errorcount = self.errorcount + 1
             with open("error.log", "a") as logFile:
                 logFile.write(sql + "\n")
             db.rollback()
