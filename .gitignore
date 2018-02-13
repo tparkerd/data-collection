@@ -3,6 +3,7 @@
 *.bin
 *.exe
 *.out
+out.sql
 /output
 /manual
 /node_modules
