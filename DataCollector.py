@@ -132,7 +132,7 @@ class DataCollector:
         db = MySQLdb.connect(self.host, self.username, self.password)
         cursor = db.cursor()
         cursor.execute("DROP DATABASE IF EXISTS {}".format(self.database))
-        cursor.execute("CREATE DATABASE IF NOT EXISTS {}".format(self.database))
+        cursor.execute("CREATE DATABASE IF NOT EXISTS {} CHARACTER SET utf8mb4".format(self.database))
         cursor.execute("USE {}".format(self.database))
 
         sql = """ CREATE TABLE posts(
@@ -185,7 +185,7 @@ class DataCollector:
                         submission_type VARCHAR(35),
                         selfbody_text TEXT(12000),
                         CONSTRAINT PRIMARY KEY (_id)
-                    ) ENGINE = INNODB CHARACTER SET = utf8
+                    ) ENGINE = INNODB
                   """
 
         cursor.execute(sql)
