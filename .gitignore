@@ -4,6 +4,7 @@
 *.exe
 *.out
 out.sql
+/scripts/generator/out.sql
 /output
 /manual
 /node_modules
