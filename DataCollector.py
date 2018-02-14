@@ -405,6 +405,7 @@ if __name__ == '__main__':
     parser.add_argument('-end', dest='end', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Ending date to finish search. Exclusive.')
     args = parser.parse_args()
     args.database = args.subreddits[0] + '_' + args.start + '_' + args.end
+    args.database = args.database.replace('-', '', 4)
     args.start = unix_time_int(args.start)
     args.end = unix_time_int(args.end)
-    # DataCollector().main(args)
+    DataCollector().main(args)
