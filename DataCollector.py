@@ -341,7 +341,7 @@ class DataCollector:
             with open("faultySQL.log", "a") as sqlLog:
                 sqlLog.write(sql + "\n")
             with open("error.log", "a") as errorLog:
-                errorLog.write(e + "\n")
+                errorLog.write(str(e) + "\n")
             db.rollback()
         finally:
             cursor.close()
