@@ -185,7 +185,7 @@ class DataCollector:
                         submission_type VARCHAR(35),
                         selfbody_text TEXT(12000),
                         CONSTRAINT PRIMARY KEY (_id)
-                    ) ENGINE = INNODB
+                    ) ENGINE = INNODB CHARACTER SET = utf8
                   """
 
         cursor.execute(sql)
