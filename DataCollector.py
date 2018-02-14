@@ -130,7 +130,15 @@ class DataCollector:
 
     def createTables(self):
         db = MySQLdb.connect(self.host, self.username, self.password)
+
+        # Fix: encoding error for non-latin characters
+        db.set_character_set('utf8mb4')
         cursor = db.cursor()
+        cursor.execute('SET NAMES utf8;')
+        cursor.execute('SET CHARACTER SET utf8;')
+        cursor.execute('SET character_set_connection=utf8;')
+        # end fix
+
         cursor.execute("DROP DATABASE IF EXISTS {}".format(self.database))
         cursor.execute("CREATE DATABASE IF NOT EXISTS {} CHARACTER SET utf8mb4".format(self.database))
         cursor.execute("USE {}".format(self.database))
@@ -316,7 +324,13 @@ class DataCollector:
 
         # Attempt to run query
         db = MySQLdb.connect(self.host, self.username, self.password, self.database)
+        # Fix: encoding error for non-latin characters
+        db.set_character_set('utf8mb4')
         cursor = db.cursor()
+        cursor.execute('SET NAMES utf8;')
+        cursor.execute('SET CHARACTER SET utf8;')
+        cursor.execute('SET character_set_connection=utf8;')
+        # end fix
         try:
             cursor.execute(sql)
             db.commit()
