@@ -28,12 +28,6 @@ class DataCollector:
     username = ''
     password = ''
 
-    # Subreddits to pull data from
-    # https://anvaka.github.io/redsim/
-    # Suggested subreddits similar to r/depression were taken from https://github.com/anvaka/redsim
-    SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "casualconversation", "selfharm", "advice", "adhd", "confession", "amiugly", "bipolar", "bipolarreddit", "stopselfharm", "drugs", "mentalhealth" ]
-    SUBREDDITS = [ "depression", "suicidewatch", "anxiety", "foreveralone", "offmychest", "socialanxiety", "sanctionedsuicide", "selfharm", "confession", "bipolar", "bipolarreddit", "stopselfharm", "mentalhealth" ]
-
     # Name of columns in the table
     FIELDS = ['approved_at_utc',
      'approved_by',
@@ -405,11 +399,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Pulls down submissions from Reddit using PRAW')
     parser.add_argument('-o', dest='outputFileName', type=str, default='out.csv', help='Does nothing.')
-    parser.add_argument('-db', dest='database', type=str, default=s, help='Specify database name. Default: Current date and time.')
+    parser.add_argument('-db', dest='database', type=str, default=s, help='Specify database name. Default: first subreddit_start date_end_time')
     parser.add_argument('-sub', dest='subreddits', type=str, default='', nargs='*', help='Specify subreddit(s) by name to parse.')
     parser.add_argument('-start', dest='start', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Starting date to begin search. Inclusive.')
     parser.add_argument('-end', dest='end', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Ending date to finish search. Exclusive.')
     args = parser.parse_args()
+    args.database = args.subreddits[0] + '_' + args.start + '_' + args.end
     args.start = unix_time_int(args.start)
     args.end = unix_time_int(args.end)
-    DataCollector().main(args)
+    # DataCollector().main(args)

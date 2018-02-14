@@ -87,4 +87,4 @@ LINES TERMINATED BY '\\n';`
 }
 
 // Rows, Columns (Scores increment, Text Length Increments)
-pivotTableGen(31, 10, 10, 50)
+pivotTableGen(40, 20, 10, 50)
