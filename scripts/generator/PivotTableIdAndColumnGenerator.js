@@ -5,7 +5,7 @@ let score_group = (n) => {
 }
 let length_group = (n) => {
   for (let i = 0; i < n; i++) {
-    console.log(`WHEN p.score BETWEEN ${i * 50 + 1} AND ${(i + 1) * 50} THEN 'Group ${i + 1}: ${i * 50 + 1} - ${(i + 1) * 50}'`)
+    console.log(`WHEN CHAR_LENGTH(p.content_text) BETWEEN ${i * 50 + 1} AND ${(i + 1) * 50} THEN 'Group ${i + 1}: ${i * 50 + 1} - ${(i + 1) * 50}'`)
   }
 }
 
