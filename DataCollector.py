@@ -390,21 +390,15 @@ def unix_time_int(dt):
     return int((datetime.strptime(dt, '%Y-%m-%d') - epoch).total_seconds())
 
 if __name__ == '__main__':
-    # Create a default database name based on the current date and time
-    s = str(datetime.now())
-    pattern = re.compile(r'[\s+\-\:]')
-    s = re.sub(pattern, '_', s)
-    pattern = re.compile(r'_\d{2}\.\d*')
-    s = re.sub(pattern, '', s)
-
     parser = argparse.ArgumentParser(description='Pulls down submissions from Reddit using PRAW')
-    parser.add_argument('-o', dest='outputFileName', type=str, default='out.csv', help='Does nothing.')
-    parser.add_argument('-db', dest='database', type=str, default=s, help='Specify database name. Default: first subreddit_start date_end_time')
-    parser.add_argument('-sub', dest='subreddits', type=str, default='', nargs='*', help='Specify subreddit(s) by name to parse.')
-    parser.add_argument('-start', dest='start', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Starting date to begin search. Inclusive.')
-    parser.add_argument('-end', dest='end', type=str, default=datetime.now().strftime('%Y-%d-%j'), help='Format: YYYY-MM-DD. Ending date to finish search. Exclusive.')
+    parser.add_argument('-db', dest='database', type=str, default=None, help='Specify database name. Default: first subreddit_start date_end_time')
+    parser.add_argument('-sub', dest='subreddits', required=True, type=str, default=None, nargs='*', help='Specify subreddit(s) by name to parse.')
+    parser.add_argument('-start', dest='start', required=True, type=str, default=None, help='Format: YYYY-MM-DD. Starting date to begin search. Inclusive.')
+    parser.add_argument('-end', dest='end', type=str, default=datetime.now().strftime('%Y-%m-%d'), help='Format: YYYY-MM-DD. Ending date to finish search. Exclusive.')
     args = parser.parse_args()
-    args.database = args.subreddits[0] + '_' + args.start + '_' + args.end
+    if args.database is None:
+        args.database = args.subreddits[0] + '_' + args.start + '_' + args.end
+        args.database = args.database.replace('-', '', 4)
     args.start = unix_time_int(args.start)
     args.end = unix_time_int(args.end)
-    # DataCollector().main(args)
+    DataCollector().main(args)
