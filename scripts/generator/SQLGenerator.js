@@ -7,7 +7,7 @@ const fs = require('fs')
 // Ti = text length increment
 let pivotTableGen = (rows, cols, si, ti) => {
   cols--
-  let alias = "abcdefghijklmnopqrstuvwxyz".split('')
+  let alias = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
   let o = ''
 
   // Create row (unions)

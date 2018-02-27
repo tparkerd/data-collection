@@ -7,7 +7,7 @@ CREATE TABLE posts LIKE olddb.posts;
 -- Insert all of the values into the new database table
 
 INSERT INTO
-  mergetest.posts(
+  collection.posts(
     approved_at_utc,
     approved_by,
     archived,
@@ -104,4 +104,12 @@ INSERT INTO
     content_text,
     submission_type,
     selfbody_text
-  FROM GetMotivated_20170101_20180101.posts;
+  FROM depression_20170101_20180101.posts;
+
+
+  -- GetMotivated_20160101_20170101
+  -- GetMotivated_20170101_20180101
+  -- depression_20160101_20170101
+  -- depression_20170101_20180101
+  -- getting_over_it_20160101_20170101
+  -- getting_over_it_20170101_20180101

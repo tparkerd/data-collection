@@ -361,7 +361,7 @@ class DataCollector:
         # Open up the config file and read it's contents
         config = configparser.ConfigParser()
         config.sections()
-        config.read('credentials.ini')
+        config.read('../cfg/credentials.ini')
 
         # Create an instance of Reddit with OAuth2
         reddit = praw.Reddit(client_id = config['User']['id'],
@@ -374,7 +374,7 @@ class DataCollector:
         reddit = self.init()
         config = configparser.ConfigParser()
         config.sections()
-        config.read('credentials.ini')
+        config.read('../cfg/credentials.ini')
         self.host = config['db']['host']
         self.username = config['db']['username']
         self.password = config['db']['password']
