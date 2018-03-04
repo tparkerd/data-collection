@@ -1,3 +1,5 @@
+# Converts VADER lexicon to 0 to 5 rating
+
 import argparse
 import csv
 
