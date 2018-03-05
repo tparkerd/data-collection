@@ -11,4 +11,4 @@ let length_group = (n) => {
 
 
 // score_group(33)
-length_group(20)
+length_group(99)
