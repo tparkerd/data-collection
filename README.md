@@ -1,4 +1,8 @@
 # Data Collection Script
+
+## _No longer supported_
+Since the reddit API no longer supports CloudSyntax, this script does not function. When I get the time, I will update this or create a different script that will handle extracting data from pushshift.io's collection of reddit posts
+
 ## Dependencies
 - [Python 3.6.4](https://www.python.org/)
 - [PRAW v5.3.0](https://praw.readthedocs.io/en/latest/index.html)
